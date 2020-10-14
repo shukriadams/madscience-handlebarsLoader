@@ -1,5 +1,6 @@
 {
     "name": "madscience-handlebarsloader",
+    "version" : "0.0.1a",
     "license": "MIT",
     "description": "Loads handlebars content",
     "dependencies": {
