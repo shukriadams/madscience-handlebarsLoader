@@ -24,7 +24,11 @@ module.exports = {
 
         pages = {}
         views = {}
-
+        
+        // register layouts as helper, this is always loaded
+        Handlebars.registerHelper(layouts(Handlebars))
+        
+        
         // load and register file-based helpers
         if (typeof options.helpers === 'string')
             options.helpers = [options.helpers]
@@ -35,8 +39,6 @@ module.exports = {
                 for (const helperPath of helpers)
                     (require(helperPath))(Handlebars)
 
-                // register handlebars helpers
-                Handlebars.registerHelper(layouts(Handlebars))
             } else console.warn(`helper path ${helperPath} not found`)
         }
 
