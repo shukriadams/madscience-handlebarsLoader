@@ -25,6 +25,6 @@ Use
 
     // use in express route
     express.get('/', async function (req, res) {
-        const view = await handlebarsLoader.getPage('myview')
+        const view = await loader.getPage('myview')
         res.send(view())
     })
