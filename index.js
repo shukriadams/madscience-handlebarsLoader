@@ -1,5 +1,3 @@
-
-
 let Handlebars = require('handlebars'),
     fs = require('fs-extra'),
     fsUtils = require('madscience-fsUtils'),
@@ -7,17 +5,28 @@ let Handlebars = require('handlebars'),
     views = null,
     path = require('path'),
     layouts = require('handlebars-layouts'),
+    model = {},
     options = {
         forceInitialize : false,
-        helpers : path.join('handlebars', 'helpers'),
-        partials : path.join('handlebars', 'partials'),
-        pages : path.join('handlebars', 'pages')
+        helpers : null,
+        partials : null,
+        data : null,
+        pages : null
     }
 
 module.exports = {
 
-    initialize(opts){
+    model,
+
+    // expose the handlebars instance bound
+    Handlebars,
+
+    initialize(opts, overrideHandelbars){
         options = Object.assign(options, opts)
+
+        // allow handlebars to passed in by initialize
+        if (overrideHandelbars)
+            Handlebars = overrideHandelbars
     },
 
     async _loadViews(){
@@ -33,22 +42,62 @@ module.exports = {
         if (typeof options.helpers === 'string')
             options.helpers = [options.helpers]
 
-        for (const helperPath of options.helpers){
-            if (await fs.exists(helperPath)){
-                const helpers = fsUtils.getFilesAsModulePathsSync(helperPath)
-                for (const helperPath of helpers)
-                    (require(helperPath))(Handlebars)
+        if (options.helpers)
+            for (const helperPath of options.helpers){
+                if (await fs.exists(helperPath)){
+                    const helpers = fsUtils.getFilesAsModulePathsSync(helperPath)
+                    for (const helperPath of helpers)
+                        (require(helperPath))(Handlebars)
 
-            } else console.warn(`helper path ${helperPath} not found`)
-        }
+                } else console.warn(`helper path ${helperPath} not found`)
+            }
+        
+        // data : data is a highly simplified way of creating a monolithic data context. this is normally
+        // used for simple prototyping only
+        if (typeof options.data === 'string')
+            options.data = [options.data]
+
+        if (options.data)
+            for (const dataPath of options.data){
+                if (!await fs.exists(dataPath)) {
+                    console.warn(`partials path ${dataPath} not found`)
+                    continue
+                }
+
+                const dataFilePaths = await fsUtils.readFilesUnderDir(dataPath) 
+                for (const dataFilePath of dataFilePaths){
+                    const content = fs.readFileSync(dataFilePath, 'utf8'),
+                        // model name is the json file name relative to path folder, minus .hbs extension
+                        name = path.resolve(dataFilePath).replace(path.resolve(dataPath), '').match(/\/(.*).json/).pop()
+
+                    if (model[name]){
+                        console.warn(`The model "${name}" (from file ${dataFilePath}) is already taken by another model.`)
+                        continue
+                    }    
+                    let parsed = null
+                    try {
+                        parsed = JSON.parse(content)
+                    } catch (ex){
+                        console.error(`failed to parse expected JSON in file ${dataFilePath}. Is this a JSON file?`)
+                        console.error(ex)
+                    }
+
+                    model[name] = parsed
+                }
+            }
 
 
         // partials
         if (typeof options.partials === 'string')
             options.partials = [options.partials]
 
-        for (const partialsPath of options.partials){
-            if (await fs.exists(partialsPath)){
+        if (options.partials)
+            for (const partialsPath of options.partials){
+                if (!await fs.exists(partialsPath)){
+                    console.warn(`partials path ${partialsPath} not found`)
+                    continue
+                }
+
                 partialPaths = await fsUtils.readFilesUnderDir(partialsPath) 
 
                 for (const partialPath of partialPaths){
@@ -64,16 +113,20 @@ module.exports = {
                     Handlebars.registerPartial(name, content)
                     views[name] = true
                 }
-            } else console.warn(`partials path ${partialsPath} not found`)
-        }
+            }
 
         
         // pages
         if (typeof options.pages === 'string')
             options.pages = [options.pages]
 
-        for (const pagesPath of options.pages){
-            if (await fs.exists(pagesPath)){
+        if (options.pages)
+            for (const pagesPath of options.pages){
+                if (!await fs.exists(pagesPath)){
+                    console.warn(`pages path ${pagesPath} not found`)
+                    continue
+                } 
+
                 const pagePaths = await fsUtils.readFilesUnderDir(pagesPath)
                 for (const pagePath of pagePaths){
                     const content = fs.readFileSync(pagePath, 'utf8'),
@@ -87,8 +140,7 @@ module.exports = {
 
                     pages[name] = Handlebars.compile(content)
                 }
-            } else console.warn(`pages path ${pagesPath} not found`)
-        }
+            }
     },
 
     async getPage(page) {
