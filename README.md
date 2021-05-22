@@ -28,3 +28,11 @@ Use
         const view = await loader.getPage('myview')
         res.send(view())
     })
+
+## Helper structure
+
+    module.exports = Handlebars => {
+        Handlebars.registerHelper('myHelper', ()=>{
+            // ...
+        })
+    }
