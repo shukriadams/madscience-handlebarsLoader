@@ -66,9 +66,14 @@ module.exports = {
 
                 const dataFilePaths = await fsUtils.readFilesUnderDir(dataPath) 
                 for (const dataFilePath of dataFilePaths){
-                    const content = fs.readFileSync(dataFilePath, 'utf8'),
+                    let content = fs.readFileSync(dataFilePath, 'utf8'),
                         // model name is the json file name relative to path folder, minus .hbs extension
-                        name = path.resolve(dataFilePath).replace(path.resolve(dataPath), '').match(/\/(.*).json/).pop()
+                        name = path.resolve(dataFilePath).replace(path.resolve(dataPath), '').match(/\/(.*).json/)
+
+                    if (!name)
+                        continue
+
+                    name = name.pop()
 
                     if (model[name]){
                         console.warn(`The model "${name}" (from file ${dataFilePath}) is already taken by another model.`)
@@ -101,9 +106,14 @@ module.exports = {
                 partialPaths = await fsUtils.readFilesUnderDir(partialsPath) 
 
                 for (const partialPath of partialPaths){
-                    const content = fs.readFileSync(partialPath, 'utf8'),
+                    let content = fs.readFileSync(partialPath, 'utf8'),
                         // partial name is the hbs file name relative to path folder, minus .hbs extension
-                        name = path.resolve(partialPath).replace(path.resolve(partialsPath), '').match(/\/(.*).hbs/).pop()
+                        name = path.resolve(partialPath).replace(path.resolve(partialsPath), '').match(/\/(.*).hbs/)
+
+                    if (!name)
+                        continue
+
+                    name = name.pop()
 
                     if (views[name]){
                         console.warn(`The partial "${name}" (from view ${partialPath}) is already taken by another partial.`)
@@ -129,9 +139,13 @@ module.exports = {
 
                 const pagePaths = await fsUtils.readFilesUnderDir(pagesPath)
                 for (const pagePath of pagePaths){
-                    const content = fs.readFileSync(pagePath, 'utf8'),
+                    let content = fs.readFileSync(pagePath, 'utf8'),
                         // view name is the hbs file name relative to path folder, minus .hbs extension
-                        name = path.resolve(pagePath).replace(path.resolve(pagesPath), '').match(/\/(.*).hbs/).pop()
+                        name = path.resolve(pagePath).replace(path.resolve(pagesPath), '').match(/\/(.*).hbs/)
+                    if (!name)
+                        continue
+
+                    name = name.pop()
                     
                     if (pages[name]){
                         console.warn(`The page "${name}" (from view ${pagePath}) is already taken by another view.`)
