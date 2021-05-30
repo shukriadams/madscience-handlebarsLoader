@@ -6,6 +6,9 @@ let Handlebars = require('handlebars'),
     path = require('path'),
     layouts = require('handlebars-layouts'),
     model = {},
+    toUnixPath = (string) =>{
+        return string.replace(/\\/g, '/')
+    },
     options = {
         forceInitialize : false,
         helpers : null,
@@ -68,7 +71,7 @@ module.exports = {
                 for (const dataFilePath of dataFilePaths){
                     let content = fs.readFileSync(dataFilePath, 'utf8'),
                         // model name is the json file name relative to path folder, minus .hbs extension
-                        name = path.resolve(dataFilePath).replace(path.resolve(dataPath), '').match(/\/(.*).json/)
+                        name = toUnixPath(path.resolve(dataFilePath).replace(path.resolve(dataPath), '')).match(/\/(.*).json/)
 
                     if (!name)
                         continue
@@ -106,9 +109,9 @@ module.exports = {
                 partialPaths = await fsUtils.readFilesUnderDir(partialsPath) 
 
                 for (const partialPath of partialPaths){
-                    let content = fs.readFileSync(partialPath, 'utf8'),
+                     let content = fs.readFileSync(partialPath, 'utf8'),
                         // partial name is the hbs file name relative to path folder, minus .hbs extension
-                        name = path.resolve(partialPath).replace(path.resolve(partialsPath), '').match(/\/(.*).hbs/)
+                        name = toUnixPath(path.resolve(partialPath).replace(path.resolve(partialsPath), '')).match(/\/(.*).hbs/)
 
                     if (!name)
                         continue
@@ -141,7 +144,8 @@ module.exports = {
                 for (const pagePath of pagePaths){
                     let content = fs.readFileSync(pagePath, 'utf8'),
                         // view name is the hbs file name relative to path folder, minus .hbs extension
-                        name = path.resolve(pagePath).replace(path.resolve(pagesPath), '').match(/\/(.*).hbs/)
+                        name = toUnixPath(path.resolve(pagePath).replace(path.resolve(pagesPath), '')).match(/\/(.*).hbs/)
+
                     if (!name)
                         continue
 
