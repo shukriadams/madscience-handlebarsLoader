@@ -4,6 +4,8 @@ let Handlebars = require('handlebars'),
     pages = null,
     views = null,
     path = require('path'),
+    process = require('process'),
+    cwd = process.cwd(),
     layouts = require('handlebars-layouts'),
     model = {},
     toUnixPath = (string) =>{
@@ -49,8 +51,11 @@ module.exports = {
             for (const helperPath of options.helpers){
                 if (await fs.exists(helperPath)){
                     const helpers = fsUtils.getFilesAsModulePathsSync(helperPath)
-                    for (const helperPath of helpers)
-                        (require(helperPath))(Handlebars)
+                    
+                    for (let helperPath of helpers){
+                        helperPath = path.join(cwd, helperPath)
+                        ;(require(helperPath))(Handlebars)
+                    }
 
                 } else console.warn(`helper path ${helperPath} not found`)
             }
