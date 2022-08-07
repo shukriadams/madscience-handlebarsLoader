@@ -83,10 +83,9 @@ module.exports = {
 
                     name = name.pop()
 
-                    if (model[name]){
-                        console.warn(`The model "${name}" (from file ${dataFilePath}) is already taken by another model.`)
+                    if (model[name])
                         continue
-                    }    
+                    
                     let parsed = null
                     try {
                         parsed = JSON.parse(content)
@@ -123,10 +122,8 @@ module.exports = {
 
                     name = name.pop()
 
-                    if (views[name]){
-                        console.warn(`The partial "${name}" (from view ${partialPath}) is already taken by another partial.`)
+                    if (views[name])
                         continue
-                    }    
 
                     Handlebars.registerPartial(name, content)
                     views[name] = true
@@ -156,10 +153,8 @@ module.exports = {
 
                     name = name.pop()
                     
-                    if (pages[name]){
-                        console.warn(`The page "${name}" (from view ${pagePath}) is already taken by another view.`)
+                    if (pages[name])
                         continue
-                    }    
 
                     pages[name] = Handlebars.compile(content)
                 }
