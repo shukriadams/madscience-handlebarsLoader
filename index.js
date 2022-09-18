@@ -53,7 +53,6 @@ module.exports = {
                     const helpers = fsUtils.getFilesAsModulePathsSync(helperPath)
                     
                     for (let helperPath of helpers){
-                        helperPath = path.join(cwd, helperPath)
                         ;(require(helperPath))(Handlebars)
                     }
 
