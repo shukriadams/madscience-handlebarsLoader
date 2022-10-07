@@ -22,6 +22,11 @@ Use
         pages : './path/to/handlebars/pages',
         partials : './path/to/handlebars/partials',
     })
+    
+    // interact with handlebars directly
+    loader.Handlebars.registerHelper('myhelper', (value)=>{
+        return `my value is ${value}`
+    })
 
     // use in express route
     express.get('/', async function (req, res) {
